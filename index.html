@@ -520,6 +520,17 @@
     .mobile-only{display:none !important;}
   }
 
+  /* ---------- HERO MOBILE REORDER (<=768px only) ---------- */
+  @media(max-width:768px){
+    .hero-divider{display:none;}
+    .hero-stats{grid-template-columns:repeat(2,1fr);row-gap:22px;}
+    .hero-left .hero-right{
+      width:100vw;margin-left:50%;transform:translateX(-50%);
+      flex:none;max-width:none;margin-top:24px;margin-bottom:24px;
+    }
+    .hero-left .hero-right img{border-radius:0;}
+  }
+
   @media(max-width:640px){
     .marquee-track span{font-size:9px;letter-spacing:1px;padding:0 12px;}
     .brand-sub{display:none;}
@@ -1351,6 +1362,46 @@
     clearTimeout(marqueeResizeTimer);
     marqueeResizeTimer = setTimeout(buildMarquee, 250);
   });
+
+  /* ---------- HERO MOBILE REORDER (<=768px only, desktop untouched) ---------- */
+  (function(){
+    var heroLeft = document.querySelector('.hero-left');
+    var heroRight = document.querySelector('.hero-right');
+    var heroDivider = document.querySelector('.hero-divider');
+    var heroStats = document.querySelector('.hero-stats');
+    var marquee = document.querySelector('.marquee-bar');
+    var contactStrip = document.querySelector('.contact-strip');
+    if(!heroLeft || !heroRight || !marquee || !contactStrip) return;
+
+    var heroRightHome = heroRight.parentNode;
+    var heroRightAnchor = heroRight.nextElementSibling;
+    var marqueeHome = marquee.parentNode;
+    var marqueeAnchor = marquee.nextElementSibling;
+
+    var isMobileOrder = false;
+
+    function applyMobileOrder(){
+      if(isMobileOrder) return;
+      heroLeft.insertBefore(heroRight, heroDivider || heroStats);
+      marqueeHome.insertBefore(contactStrip, marquee);
+      isMobileOrder = true;
+    }
+
+    function restoreDesktopOrder(){
+      if(!isMobileOrder) return;
+      heroRightHome.insertBefore(heroRight, heroRightAnchor);
+      marqueeHome.insertBefore(marquee, marqueeAnchor);
+      isMobileOrder = false;
+    }
+
+    var mq = window.matchMedia('(max-width: 768px)');
+    function handleChange(e){
+      if(e.matches){ applyMobileOrder(); } else { restoreDesktopOrder(); }
+    }
+    handleChange(mq);
+    if(mq.addEventListener){ mq.addEventListener('change', handleChange); }
+    else if(mq.addListener){ mq.addListener(handleChange); }
+  })();
 
   /* ---------- MOBILE REVIEW CAROUSEL ---------- */
   var track = document.getElementById('carouselTrack');
